@@ -20,6 +20,24 @@ get_volume_name_from_path() {
   basename "$(dirname "$(dirname "$path")")"
 }
 
+find_real_mysql() {
+  local self_path="$(realpath "$0")"
+
+  IFS=':' read -ra PATH_DIRS <<< "$PATH"
+
+  for dir in "${PATH_DIRS[@]}"; do
+    for bin in mysql mariadb; do
+      local candidate="$dir/$bin"
+      if [[ -x "$candidate" && "$(realpath "$candidate")" != "$self_path" ]]; then
+        echo "$candidate"
+        return 0
+      fi
+    done
+  done
+
+  return 1
+}
+
 DATA_ROOT=$(docker info --format '{{.DockerRootDir}}' 2>/dev/null)
 
 if [ -z "$DATA_ROOT" ]; then
@@ -60,15 +78,11 @@ fi
 
 SOCKET_PATH="${OPTIONS[$((CHOICE-1))]}"
 
-if command -v mysql >/dev/null 2>&1; then
-  MYSQL_CLI="mysql"
-elif command -v mariadb >/dev/null 2>&1; then
-  MYSQL_CLI="mariadb"
-else
-  echo "❌ Error: Neither 'mysql' nor 'mariadb' is installed."
+REAL_MYSQL=$(find_real_mysql)
+if [[ -z "$REAL_MYSQL" ]]; then
+  echo "❌ Could not find mysql/mariadb binary in \$PATH"
   exit 1
 fi
 
-# 🚀 Verbindung aufbauen
 echo "🔌 Connecting to $SOCKET_PATH ..."
-exec "$MYSQL_CLI" --socket="$SOCKET_PATH" "$@"
+exec "$REAL_MYSQL" --socket="$SOCKET_PATH" "$@"
