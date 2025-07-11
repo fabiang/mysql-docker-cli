@@ -56,4 +56,4 @@ services:
 
 ## License
 
-BSD-3-Clause. See the [LICENSE.md](LICENSE.md).
+BSD-2-Clause. See the [LICENSE.md](LICENSE.md).
