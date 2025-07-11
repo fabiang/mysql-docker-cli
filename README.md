@@ -1,6 +1,16 @@
 # mysql-docker-cli
 
 Interactive Bash which allows you to select Docker MySQL/MariaDB instance available on a machine.
+This will help you to connect to the right instance, when you have multiple instances.
+
+## How it works
+
+This script searches for `mysqld.sock` or `mariadbd.sock` under your Docker volumes path. 
+It then let you decide to which container name you want to connect.
+
+If you want to override `mysql` or `mariadb` command this script will search for the correct path to the "real" mysql binary.
+You can pass any argument to the bash script, they will be passed to the mysql binary. 
+Bind mounts aren't supported.
 
 ## Example
 
@@ -29,7 +39,7 @@ MariaDB [(none)]>
 
     curl -o /usr/local/bin/mysql "https://raw.githubusercontent.com/fabiang/mysql-docker-cli/refs/heads/main/mysql-docker-cli.sh"
 
-*Note:* of cause you must make run `/run/mysqld` directory available as volume. For example in a `docker-compose.yml`
+*Note:* of cause you must make run `/run/mysqld` directory available as a volume. For example in a `docker-compose.yml`
 
 ```yaml
 volumes:
